@@ -1,0 +1,6 @@
+.env
+vendor/
+storage/sessions/*
+!storage/sessions/.gitkeep
+assets/img/productos/*
+!assets/img/productos/.gitkeep
