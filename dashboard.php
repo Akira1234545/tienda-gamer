@@ -4,6 +4,7 @@ require_once __DIR__ . '/auth_admin.php';
 $totalVentas = db_value('SELECT COUNT(*) FROM venta', [], 0);
 $totalProductos = db_value('SELECT COUNT(*) FROM producto', [], 0);
 $totalUsuarios = db_value('SELECT COUNT(*) FROM usuario', [], 0);
+$totalIngresos = db_value('SELECT COALESCE(SUM(total), 0) FROM venta WHERE estado_venta IN ("Pagado", "Entregado")', [], 0);
 $ventasRecientes = db_all(
     'SELECT v.id_venta, u.nombre AS cliente, v.fecha, v.total, v.estado_venta
      FROM venta v
@@ -16,6 +17,14 @@ $productosBajoStock = db_all(
      FROM producto
      WHERE stock <= 5
      ORDER BY stock ASC
+     LIMIT 6'
+);
+$productosMasVendidos = db_all(
+    'SELECT p.nombre, COALESCE(SUM(d.cantidad), 0) AS vendidos
+     FROM detalle_venta d
+     INNER JOIN producto p ON p.id_producto = d.id_producto
+     GROUP BY p.id_producto, p.nombre
+     ORDER BY vendidos DESC
      LIMIT 6'
 );
 ?>
@@ -39,24 +48,31 @@ $productosBajoStock = db_all(
         <h1 class="mb-4">Dashboard Administrativo</h1>
 
         <div class="row g-4">
-            <div class="col-md-4">
+            <div class="col-md-3">
                 <div class="card stat-card shadow p-4 text-center">
                     <h2><?php echo e((string) $totalVentas); ?></h2>
                     <p class="mb-0">Ventas Totales</p>
                 </div>
             </div>
 
-            <div class="col-md-4">
+            <div class="col-md-3">
                 <div class="card stat-card shadow p-4 text-center">
                     <h2><?php echo e((string) $totalProductos); ?></h2>
                     <p class="mb-0">Productos</p>
                 </div>
             </div>
 
-            <div class="col-md-4">
+            <div class="col-md-3">
                 <div class="card stat-card shadow p-4 text-center">
                     <h2><?php echo e((string) $totalUsuarios); ?></h2>
                     <p class="mb-0">Usuarios</p>
+                </div>
+            </div>
+
+            <div class="col-md-3">
+                <div class="card stat-card shadow p-4 text-center">
+                    <h2><?php echo money($totalIngresos); ?></h2>
+                    <p class="mb-0">Ingresos</p>
                 </div>
             </div>
         </div>
@@ -107,6 +123,17 @@ $productosBajoStock = db_all(
                         <?php endif; ?>
                     </div>
                 </div>
+
+                <div class="col-lg-12">
+                    <h2 class="h4 fw-bold mb-3">Productos mas vendidos</h2>
+                    <div class="card p-4">
+                        <?php if (!$productosMasVendidos): ?>
+                            <p class="text-muted mb-0">Aun no hay productos vendidos.</p>
+                        <?php else: ?>
+                            <canvas id="soldChart" height="110"></canvas>
+                        <?php endif; ?>
+                    </div>
+                </div>
             </div>
         </div>
     </main>
@@ -116,6 +143,8 @@ $productosBajoStock = db_all(
 <script>
 const stockLabels = <?php echo json_encode(array_column($productosBajoStock, 'nombre')); ?>;
 const stockData = <?php echo json_encode(array_map('intval', array_column($productosBajoStock, 'stock'))); ?>;
+const soldLabels = <?php echo json_encode(array_column($productosMasVendidos, 'nombre')); ?>;
+const soldData = <?php echo json_encode(array_map('intval', array_column($productosMasVendidos, 'vendidos'))); ?>;
 
 if (document.getElementById('stockChart')) {
     new Chart(document.getElementById('stockChart'), {
@@ -132,6 +161,26 @@ if (document.getElementById('stockChart')) {
             responsive: true,
             plugins: { legend: { display: false } },
             scales: { y: { beginAtZero: true, ticks: { precision: 0 } } }
+        }
+    });
+}
+
+if (document.getElementById('soldChart')) {
+    new Chart(document.getElementById('soldChart'), {
+        type: 'bar',
+        data: {
+            labels: soldLabels,
+            datasets: [{
+                label: 'Unidades vendidas',
+                data: soldData,
+                backgroundColor: '#16a34a'
+            }]
+        },
+        options: {
+            indexAxis: 'y',
+            responsive: true,
+            plugins: { legend: { display: false } },
+            scales: { x: { beginAtZero: true, ticks: { precision: 0 } } }
         }
     });
 }

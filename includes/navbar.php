@@ -20,6 +20,9 @@ ensure_session();
                 <li class="nav-item"><a class="nav-link" href="index.php#beneficios">Beneficios</a></li>
                 <li class="nav-item"><a class="nav-link" href="carrito.php">Carrito</a></li>
                 <li class="nav-item"><a class="nav-link" href="favoritos.php">Favoritos</a></li>
+                <?php if (is_logged_in()): ?>
+                    <li class="nav-item"><a class="nav-link" href="compras.php">Mis compras</a></li>
+                <?php endif; ?>
                 <?php if (is_admin()): ?>
                     <li class="nav-item"><a class="nav-link" href="dashboard.php">Admin</a></li>
                 <?php endif; ?>

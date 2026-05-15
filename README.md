@@ -1,71 +1,119 @@
 # GameZone Store
 
-Primera version visual de un sistema web para venta de equipos gamer.
+Sistema web de venta de equipos gamer desarrollado con PHP, MySQL, Bootstrap 5, JavaScript y Composer.
+
+## Modulos
+
+- Landing dinamica con productos, categorias, buscador y filtros.
+- Login, registro, logout y sesiones.
+- Roles `admin` y `cliente`.
+- 2FA por correo con PHPMailer.
+- CRUD de productos con upload de imagenes.
+- CRUD de categorias.
+- Carrito con `$_SESSION`.
+- Checkout con transacciones PDO.
+- Ventas y detalle de venta.
+- Descuento automatico de stock.
+- Favoritos por usuario.
+- Historial de compras del cliente.
+- Dashboard administrativo con metricas, bajo stock y productos mas vendidos.
+- Panel de usuarios con cambio de roles.
 
 ## Tecnologias
 
-- HTML5
-- CSS3
+- PHP 8.2
+- MySQL / MariaDB
+- PDO
 - Bootstrap 5
 - JavaScript
-- PHP como estructura visual
+- Composer
+- PHPMailer
+- Chart.js
 
-## Paginas incluidas
+## Instalacion
 
-- `index.php`: landing page
-- `login.php`: inicio de sesion
-- `register.php`: registro
-- `dashboard.php`: panel administrativo
-- `productos.php`: administracion de productos
-- `carrito.php`: carrito de compras
-- `favoritos.php`: productos favoritos
-- `ventas.php`: listado visual de ventas
-- `usuarios.php`: listado visual de usuarios
-- `categorias.php`: categorias
-- `perfil.php`: perfil de usuario
-- `logout.php`: cierre de sesion visual
+1. Copia el proyecto dentro de `C:\xampp\htdocs`.
+2. Instala dependencias:
 
-## Estado actual
+```bash
+composer install
+```
 
-Incluye interfaz responsive con Bootstrap, estructura de carpetas, includes reutilizables, estilos propios, JavaScript basico e imagenes locales de muestra.
+3. Importa la base de datos desde phpMyAdmin:
 
-Tambien incluye:
+```text
+database/tienda_gamer.sql
+```
 
-- Login con sesiones.
-- Proteccion de rutas por rol.
-- Registro con `password_hash()`.
-- Login con `password_verify()`.
-- 2FA opcional por usuario.
-- CRUD de productos con upload de imagenes.
-- CRUD de categorias.
-- Carrito en `$_SESSION`.
-- Registro de ventas y detalle de venta.
-- Descuento de stock al comprar.
-- Favoritos por usuario.
-- Dashboard con contadores reales, ultimas ventas y grafico de bajo stock.
-- Filtros de productos en la landing.
+4. Si ya tenias la base importada antes del 2FA avanzado, ejecuta:
 
-## Base de datos
+```text
+database/migrations_2fa.sql
+```
 
-El proyecto usa PDO y la configuracion esta en `config/database.php`.
+5. Copia `.env.example` como `.env` y ajusta credenciales:
 
-Configuracion por defecto para XAMPP:
+```text
+DB_HOST=localhost
+DB_NAME=tienda_gamer
+DB_USER=root
+DB_PASS=
+```
 
-- Host: `localhost`
-- Base de datos: `tienda_gamer`
-- Usuario: `root`
-- Contrasena: vacia
+6. Abre:
 
-Importa el archivo `database/tienda_gamer.sql` desde phpMyAdmin para crear las tablas y datos de ejemplo.
+```text
+http://localhost/Store_Gamming_Proyect/
+```
 
-Si ya habias importado la base antes de agregar el 2FA avanzado, ejecuta tambien `database/migrations_2fa.sql`.
+## Usuario admin
 
-Para configurar credenciales locales, copia `.env.example` como `.env` y ajusta DB/SMTP. No subas `.env` a Git.
+```text
+Correo: admin@tiendagamer.com
+Contrasena: Admin123!
+```
 
-## Proximas implementaciones
+Si tu admin fue creado antes, actualiza el hash:
 
-- Paginacion de productos
-- Recuperar contrasena
-- Buscador AJAX
-- Reportes PDF o Excel
-- Mejoras visuales con SweetAlert o Toasts
+```sql
+UPDATE usuario
+SET contraseña = '$2y$10$VBMWwQMsCKU4FLX/LUGHF.SHKOxyUXJSWrd2bz2xYCL5H/hMMv8oy'
+WHERE correo = 'admin@tiendagamer.com';
+```
+
+## SMTP 2FA
+
+En `.env`:
+
+```text
+SMTP_ENABLED=true
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=587
+SMTP_SECURE=tls
+SMTP_USER=tu_correo@gmail.com
+SMTP_PASS=tu_password_de_aplicacion
+SMTP_FROM=tu_correo@gmail.com
+SMTP_FROM_NAME=GameZone Store
+```
+
+## Seguridad
+
+- Consultas preparadas PDO.
+- `password_hash()` y `password_verify()`.
+- `htmlspecialchars()` para salida.
+- Tokens CSRF en formularios.
+- `session_regenerate_id()` al iniciar sesion.
+- Expiracion de sesion por inactividad.
+- Validacion de uploads por MIME, tamano y extension.
+- `.env` ignorado por Git.
+
+## Git recomendado
+
+```bash
+git add .
+git commit -m "feat: sistema tienda gamer funcional"
+git remote add origin URL_DEL_REPOSITORIO
+git push -u origin main
+```
+
+No se sube `vendor/`; se restaura con `composer install`.

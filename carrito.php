@@ -105,7 +105,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $pdo->commit();
             $_SESSION['carrito'] = [];
             flash('success', 'Compra confirmada correctamente.');
-            redirect('carrito.php');
+            redirect('compras.php');
         }
     } catch (Throwable $exception) {
         if (db()?->inTransaction()) {
