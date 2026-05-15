@@ -74,6 +74,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <div class="mb-3">
                         <label class="form-label">Contrasena</label>
                         <input type="password" name="contrasena" class="form-control" minlength="8" required>
+                        <div class="form-text">Debe tener al menos 8 caracteres.</div>
                     </div>
 
                     <button class="btn btn-success w-100">Registrarse</button>

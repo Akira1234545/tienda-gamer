@@ -132,7 +132,32 @@ if (!$categoriasLanding && !db()) {
     </div>
 </section>
 
-<section class="container section-space pt-0" id="tienda">
+<section class="category-section text-white section-space" id="categorias">
+    <div class="container">
+        <div class="section-heading text-center">
+            <span class="eyebrow">Explora por tipo</span>
+            <h2>Categorias</h2>
+        </div>
+
+        <div class="row text-center g-4">
+            <?php if (!$categoriasLanding): ?>
+                <div class="col-12">
+                    <div class="alert alert-dark border text-center mb-0">Aun no hay categorias registradas.</div>
+                </div>
+            <?php endif; ?>
+
+            <?php foreach (array_slice($categoriasLanding, 0, 4) as $categoria): ?>
+                <div class="col-md-3">
+                    <div class="category-box p-4 rounded">
+                        <h4><?php echo e($categoria['nombre_categoria']); ?></h4>
+                    </div>
+                </div>
+            <?php endforeach; ?>
+        </div>
+    </div>
+</section>
+
+<section class="container section-space" id="tienda">
     <div class="section-heading text-center">
         <span class="eyebrow"><?php echo e($infoTienda['nombre']); ?></span>
         <h2>Informacion de la tienda</h2>
@@ -157,31 +182,6 @@ if (!$categoriasLanding && !db()) {
                 <h4>Contacto</h4>
                 <p><?php echo e($infoTienda['correo']); ?> - <?php echo e($infoTienda['telefono']); ?></p>
             </div>
-        </div>
-    </div>
-</section>
-
-<section class="category-section text-white section-space" id="categorias">
-    <div class="container">
-        <div class="section-heading text-center">
-            <span class="eyebrow">Explora por tipo</span>
-            <h2>Categorias</h2>
-        </div>
-
-        <div class="row text-center g-4">
-            <?php if (!$categoriasLanding): ?>
-                <div class="col-12">
-                    <div class="alert alert-dark border text-center mb-0">Aun no hay categorias registradas.</div>
-                </div>
-            <?php endif; ?>
-
-            <?php foreach (array_slice($categoriasLanding, 0, 4) as $categoria): ?>
-                <div class="col-md-3">
-                    <div class="category-box p-4 rounded">
-                        <h4><?php echo e($categoria['nombre_categoria']); ?></h4>
-                    </div>
-                </div>
-            <?php endforeach; ?>
         </div>
     </div>
 </section>

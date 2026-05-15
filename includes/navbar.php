@@ -17,6 +17,7 @@ ensure_session();
             <ul class="navbar-nav ms-auto align-items-lg-center">
                 <li class="nav-item"><a class="nav-link" href="index.php#productos">Productos</a></li>
                 <li class="nav-item"><a class="nav-link" href="index.php#categorias">Categorias</a></li>
+                <li class="nav-item"><a class="nav-link" href="index.php#tienda">Tienda</a></li>
                 <li class="nav-item"><a class="nav-link" href="index.php#beneficios">Beneficios</a></li>
                 <?php if (is_logged_in()): ?>
                     <li class="nav-item">
