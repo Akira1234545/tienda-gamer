@@ -27,6 +27,10 @@ document.querySelectorAll(".js-confirm").forEach((form) => {
     });
 });
 
+document.querySelectorAll(".js-auto-dismiss").forEach((alert) => {
+    setTimeout(() => dismissAlert(alert), 5000);
+});
+
 function showInlineAlert(form, message) {
     const previous = form.querySelector(".client-alert");
 
@@ -38,6 +42,21 @@ function showInlineAlert(form, message) {
     alert.className = "alert alert-warning client-alert";
     alert.textContent = message;
     form.prepend(alert);
+    setTimeout(() => alert.remove(), 5000);
+}
+
+function dismissAlert(alert) {
+    if (!alert.isConnected) {
+        return;
+    }
+
+    if (window.bootstrap?.Alert) {
+        bootstrap.Alert.getOrCreateInstance(alert).close();
+        return;
+    }
+
+    alert.classList.remove("show");
+    setTimeout(() => alert.remove(), 180);
 }
 
 function validateField(field) {
