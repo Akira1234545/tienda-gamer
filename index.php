@@ -5,6 +5,7 @@ $busqueda = trim($_GET['q'] ?? '');
 $categoriaFiltro = (int) ($_GET['categoria'] ?? 0);
 $marcaFiltro = trim($_GET['marca'] ?? '');
 $precioMax = (float) ($_GET['precio_max'] ?? 0);
+$infoTienda = store_info();
 
 $categoriasLanding = db_all(
     'SELECT id_categoria, nombre_categoria
@@ -133,27 +134,28 @@ if (!$categoriasLanding && !db()) {
 
 <section class="container section-space pt-0" id="tienda">
     <div class="section-heading text-center">
-        <span class="eyebrow">GameZone Store</span>
+        <span class="eyebrow"><?php echo e($infoTienda['nombre']); ?></span>
         <h2>Informacion de la tienda</h2>
+        <p><?php echo e($infoTienda['descripcion']); ?></p>
     </div>
 
     <div class="row g-4 text-center">
         <div class="col-md-4">
             <div class="benefit-item p-4">
                 <h4>Ubicacion</h4>
-                <p>Av. Gamer 123, Zona Central, La Paz.</p>
+                <p><?php echo e($infoTienda['ubicacion']); ?></p>
             </div>
         </div>
         <div class="col-md-4">
             <div class="benefit-item p-4">
                 <h4>Atencion</h4>
-                <p>Lunes a sabado de 09:00 a 19:00.</p>
+                <p><?php echo e($infoTienda['horario']); ?></p>
             </div>
         </div>
         <div class="col-md-4">
             <div class="benefit-item p-4">
                 <h4>Contacto</h4>
-                <p>ventas@gamezone.test - +591 70000000.</p>
+                <p><?php echo e($infoTienda['correo']); ?> - <?php echo e($infoTienda['telefono']); ?></p>
             </div>
         </div>
     </div>

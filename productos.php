@@ -3,6 +3,10 @@ require_once __DIR__ . '/auth_admin.php';
 
 $categorias = db_all('SELECT id_categoria, nombre_categoria FROM categoria ORDER BY nombre_categoria');
 $productoEditar = null;
+$busquedaAdmin = trim($_GET['buscar'] ?? '');
+$pagina = max(1, (int) ($_GET['pagina'] ?? 1));
+$porPagina = 10;
+$offset = ($pagina - 1) * $porPagina;
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     try {
@@ -73,11 +77,31 @@ if (isset($_GET['editar'])) {
     $productoEditar = db_one('SELECT * FROM producto WHERE id_producto = ?', [(int) $_GET['editar']]);
 }
 
+$whereProductos = [];
+$paramsProductos = [];
+
+if ($busquedaAdmin !== '') {
+    $whereProductos[] = '(p.nombre LIKE ? OR p.marca LIKE ? OR c.nombre_categoria LIKE ?)';
+    $like = '%' . $busquedaAdmin . '%';
+    $paramsProductos = [$like, $like, $like];
+}
+
+$whereSqlProductos = $whereProductos ? ' WHERE ' . implode(' AND ', $whereProductos) : '';
+$totalProductos = (int) db_value(
+    'SELECT COUNT(*)
+     FROM producto p
+     INNER JOIN categoria c ON c.id_categoria = p.id_categoria' . $whereSqlProductos,
+    $paramsProductos,
+    0
+);
+$totalPaginas = max(1, (int) ceil($totalProductos / $porPagina));
 $productos = db_all(
     'SELECT p.id_producto, p.nombre, p.marca, p.precio, p.stock, p.estado, p.imagen, c.nombre_categoria
      FROM producto p
-     INNER JOIN categoria c ON c.id_categoria = p.id_categoria
-     ORDER BY p.id_producto DESC'
+     INNER JOIN categoria c ON c.id_categoria = p.id_categoria' . $whereSqlProductos . "
+     ORDER BY p.id_producto DESC
+     LIMIT $porPagina OFFSET $offset",
+    $paramsProductos
 );
 ?>
 <!DOCTYPE html>
@@ -102,6 +126,15 @@ $productos = db_all(
             <h1 class="mb-0">Productos</h1>
             <a class="btn btn-outline-primary" href="productos.php">Limpiar formulario</a>
         </div>
+
+        <form method="GET" action="productos.php" class="row g-2 mb-4">
+            <div class="col-md-10">
+                <input type="search" name="buscar" class="form-control" placeholder="Buscar por producto, marca o categoria" value="<?php echo e($busquedaAdmin); ?>">
+            </div>
+            <div class="col-md-2">
+                <button class="btn btn-primary w-100">Buscar</button>
+            </div>
+        </form>
 
         <div class="card p-4 mb-4">
             <h2 class="h4 fw-bold mb-3"><?php echo $productoEditar ? 'Editar producto' : 'Nuevo producto'; ?></h2>
@@ -211,6 +244,18 @@ $productos = db_all(
                 </tbody>
             </table>
         </div>
+
+        <?php if ($totalPaginas > 1): ?>
+            <nav class="mt-4">
+                <ul class="pagination">
+                    <?php for ($i = 1; $i <= $totalPaginas; $i++): ?>
+                        <li class="page-item <?php echo $i === $pagina ? 'active' : ''; ?>">
+                            <a class="page-link" href="productos.php?buscar=<?php echo urlencode($busquedaAdmin); ?>&pagina=<?php echo $i; ?>"><?php echo $i; ?></a>
+                        </li>
+                    <?php endfor; ?>
+                </ul>
+            </nav>
+        <?php endif; ?>
     </main>
 </div>
 

@@ -84,6 +84,16 @@ CREATE TABLE IF NOT EXISTS favorito (
         ON DELETE CASCADE
 );
 
+CREATE TABLE IF NOT EXISTS configuracion_tienda (
+    id_configuracion INT PRIMARY KEY DEFAULT 1,
+    nombre VARCHAR(120) NOT NULL,
+    descripcion TEXT NOT NULL,
+    ubicacion VARCHAR(180) NOT NULL,
+    horario VARCHAR(120) NOT NULL,
+    correo VARCHAR(150) NOT NULL,
+    telefono VARCHAR(50) NOT NULL
+);
+
 INSERT INTO categoria (nombre_categoria, descripcion) VALUES
 ('Laptops Gamer', 'Laptops de alto rendimiento para gaming'),
 ('Monitores', 'Monitores gaming con alta tasa de refresco'),
@@ -100,3 +110,13 @@ INSERT INTO producto (id_categoria, nombre, marca, descripcion, precio, stock, i
 (1, 'Laptop Gamer ASUS', 'ASUS', 'RTX 4060 - Ryzen 7 - 16GB RAM', 1200.00, 10, 'producto1.jpg'),
 (4, 'Teclado Mecanico RGB', 'Redragon', 'Switch Blue - RGB completo', 90.00, 25, 'producto2.jpg'),
 (2, 'Monitor 240Hz', 'LG', 'Full HD - 1ms - Gamer Pro', 450.00, 8, 'producto3.jpg');
+
+INSERT INTO configuracion_tienda (id_configuracion, nombre, descripcion, ubicacion, horario, correo, telefono) VALUES
+(1, 'GameZone Store', 'Tienda especializada en hardware, perifericos y equipos gamer.', 'Av. Gamer 123, Zona Central, La Paz.', 'Lunes a sabado de 09:00 a 19:00.', 'ventas@gamezone.test', '+591 70000000')
+ON DUPLICATE KEY UPDATE
+    nombre = VALUES(nombre),
+    descripcion = VALUES(descripcion),
+    ubicacion = VALUES(ubicacion),
+    horario = VALUES(horario),
+    correo = VALUES(correo),
+    telefono = VALUES(telefono);

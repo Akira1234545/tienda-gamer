@@ -159,6 +159,26 @@ function product_image(?string $image, string $fallback = 'producto1.jpg'): stri
     return 'assets/img/' . $image;
 }
 
+function store_info(): array
+{
+    $defaults = [
+        'nombre' => 'GameZone Store',
+        'descripcion' => 'Tienda especializada en hardware, perifericos y equipos gamer.',
+        'ubicacion' => 'Av. Gamer 123, Zona Central, La Paz.',
+        'horario' => 'Lunes a sabado de 09:00 a 19:00.',
+        'correo' => 'ventas@gamezone.test',
+        'telefono' => '+591 70000000',
+    ];
+
+    $info = db_one(
+        'SELECT nombre, descripcion, ubicacion, horario, correo, telefono
+         FROM configuracion_tienda
+         WHERE id_configuracion = 1'
+    );
+
+    return array_merge($defaults, $info ?? []);
+}
+
 function current_user(): ?array
 {
     ensure_session();

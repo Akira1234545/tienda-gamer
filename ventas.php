@@ -1,6 +1,11 @@
 <?php
 require_once __DIR__ . '/auth_admin.php';
 
+$busquedaAdmin = trim($_GET['buscar'] ?? '');
+$pagina = max(1, (int) ($_GET['pagina'] ?? 1));
+$porPagina = 10;
+$offset = ($pagina - 1) * $porPagina;
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     try {
         verify_csrf();
@@ -19,14 +24,35 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     redirect('ventas.php');
 }
 
+$whereVentas = [];
+$paramsVentas = [];
+
+if ($busquedaAdmin !== '') {
+    $whereVentas[] = '(u.nombre LIKE ? OR u.correo LIKE ? OR v.estado_venta LIKE ? OR v.id_venta = ?)';
+    $like = '%' . $busquedaAdmin . '%';
+    $paramsVentas = [$like, $like, $like, (int) $busquedaAdmin];
+}
+
+$whereSqlVentas = $whereVentas ? ' WHERE ' . implode(' AND ', $whereVentas) : '';
+$totalVentas = (int) db_value(
+    'SELECT COUNT(*)
+     FROM venta v
+     INNER JOIN usuario u ON u.id_usuario = v.id_usuario' . $whereSqlVentas,
+    $paramsVentas,
+    0
+);
+$totalPaginas = max(1, (int) ceil($totalVentas / $porPagina));
 $ventas = db_all(
     'SELECT v.id_venta, u.nombre AS cliente, v.fecha, v.total, v.estado_venta,
             COALESCE(SUM(d.cantidad), 0) AS total_items
      FROM venta v
      INNER JOIN usuario u ON u.id_usuario = v.id_usuario
      LEFT JOIN detalle_venta d ON d.id_venta = v.id_venta
+     ' . $whereSqlVentas . "
      GROUP BY v.id_venta, u.nombre, v.fecha, v.total, v.estado_venta
-     ORDER BY v.fecha DESC'
+     ORDER BY v.fecha DESC
+     LIMIT $porPagina OFFSET $offset",
+    $paramsVentas
 );
 
 $detallesPorVenta = [];
@@ -66,6 +92,15 @@ if ($ventas) {
     <main class="container-fluid p-4">
         <?php include 'includes/flash.php'; ?>
         <h1 class="mb-4">Ventas</h1>
+
+        <form method="GET" action="ventas.php" class="row g-2 mb-4">
+            <div class="col-md-10">
+                <input type="search" name="buscar" class="form-control" placeholder="Buscar por cliente, correo, estado o ID de venta" value="<?php echo e($busquedaAdmin); ?>">
+            </div>
+            <div class="col-md-2">
+                <button class="btn btn-primary w-100">Buscar</button>
+            </div>
+        </form>
 
         <div class="table-responsive">
             <table class="table table-striped table-hover align-middle">
@@ -154,6 +189,18 @@ if ($ventas) {
                 </tbody>
             </table>
         </div>
+
+        <?php if ($totalPaginas > 1): ?>
+            <nav class="mt-4">
+                <ul class="pagination">
+                    <?php for ($i = 1; $i <= $totalPaginas; $i++): ?>
+                        <li class="page-item <?php echo $i === $pagina ? 'active' : ''; ?>">
+                            <a class="page-link" href="ventas.php?buscar=<?php echo urlencode($busquedaAdmin); ?>&pagina=<?php echo $i; ?>"><?php echo $i; ?></a>
+                        </li>
+                    <?php endfor; ?>
+                </ul>
+            </nav>
+        <?php endif; ?>
     </main>
 </div>
 

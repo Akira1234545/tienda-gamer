@@ -62,11 +62,22 @@ function validateField(field) {
     if (valid && field.type === "number" && value) {
         const numberValue = Number(value);
         const min = field.min !== "" ? Number(field.min) : null;
+        const max = field.max !== "" ? Number(field.max) : null;
 
         if (Number.isNaN(numberValue) || (min !== null && numberValue < min)) {
             valid = false;
             message = min !== null ? `El valor minimo es ${field.min}.` : "Ingresa un numero valido.";
         }
+
+        if (valid && max !== null && numberValue > max) {
+            valid = false;
+            message = `El valor maximo es ${field.max}.`;
+        }
+    }
+
+    if (valid && field.minLength > 0 && value && value.length < field.minLength) {
+        valid = false;
+        message = `Debe tener al menos ${field.minLength} caracteres.`;
     }
 
     if (valid && field.name === "precio" && Number(value) <= 0) {
@@ -82,8 +93,29 @@ function validateField(field) {
     field.classList.toggle("is-invalid", !valid);
     field.classList.toggle("is-valid", valid && value !== "");
     field.dataset.error = message;
+    showFieldFeedback(field, valid, message);
 
     return valid;
+}
+
+function showFieldFeedback(field, valid, message) {
+    const existing = field.parentElement.querySelector(`.invalid-feedback[data-for="${field.name}"]`);
+
+    if (valid) {
+        existing?.remove();
+        return;
+    }
+
+    if (existing) {
+        existing.textContent = message;
+        return;
+    }
+
+    const feedback = document.createElement("div");
+    feedback.className = "invalid-feedback d-block";
+    feedback.dataset.for = field.name;
+    feedback.textContent = message;
+    field.insertAdjacentElement("afterend", feedback);
 }
 
 document.querySelectorAll("[data-ajax-filter]").forEach((form) => {

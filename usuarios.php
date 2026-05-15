@@ -1,6 +1,11 @@
 <?php
 require_once __DIR__ . '/auth_admin.php';
 
+$busquedaAdmin = trim($_GET['buscar'] ?? '');
+$pagina = max(1, (int) ($_GET['pagina'] ?? 1));
+$porPagina = 10;
+$offset = ($pagina - 1) * $porPagina;
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     try {
         verify_csrf();
@@ -18,10 +23,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     redirect('usuarios.php');
 }
 
+$whereUsuarios = [];
+$paramsUsuarios = [];
+
+if ($busquedaAdmin !== '') {
+    $whereUsuarios[] = '(nombre LIKE ? OR correo LIKE ? OR rol LIKE ?)';
+    $like = '%' . $busquedaAdmin . '%';
+    $paramsUsuarios = [$like, $like, $like];
+}
+
+$whereSqlUsuarios = $whereUsuarios ? ' WHERE ' . implode(' AND ', $whereUsuarios) : '';
+$totalUsuarios = (int) db_value('SELECT COUNT(*) FROM usuario' . $whereSqlUsuarios, $paramsUsuarios, 0);
+$totalPaginas = max(1, (int) ceil($totalUsuarios / $porPagina));
 $usuarios = db_all(
-    'SELECT id_usuario, nombre, correo, rol, estado_2fa, fecha_registro
+    "SELECT id_usuario, nombre, correo, rol, estado_2fa, fecha_registro
      FROM usuario
-     ORDER BY id_usuario DESC'
+     $whereSqlUsuarios
+     ORDER BY id_usuario DESC
+     LIMIT $porPagina OFFSET $offset",
+    $paramsUsuarios
 );
 ?>
 <!DOCTYPE html>
@@ -42,6 +62,15 @@ $usuarios = db_all(
     <main class="container-fluid p-4">
         <?php include 'includes/flash.php'; ?>
         <h1 class="mb-4">Usuarios</h1>
+
+        <form method="GET" action="usuarios.php" class="row g-2 mb-4">
+            <div class="col-md-10">
+                <input type="search" name="buscar" class="form-control" placeholder="Buscar por nombre, correo o rol" value="<?php echo e($busquedaAdmin); ?>">
+            </div>
+            <div class="col-md-2">
+                <button class="btn btn-primary w-100">Buscar</button>
+            </div>
+        </form>
 
         <div class="table-responsive">
             <table class="table table-striped table-hover align-middle">
@@ -89,6 +118,18 @@ $usuarios = db_all(
                 </tbody>
             </table>
         </div>
+
+        <?php if ($totalPaginas > 1): ?>
+            <nav class="mt-4">
+                <ul class="pagination">
+                    <?php for ($i = 1; $i <= $totalPaginas; $i++): ?>
+                        <li class="page-item <?php echo $i === $pagina ? 'active' : ''; ?>">
+                            <a class="page-link" href="usuarios.php?buscar=<?php echo urlencode($busquedaAdmin); ?>&pagina=<?php echo $i; ?>"><?php echo $i; ?></a>
+                        </li>
+                    <?php endfor; ?>
+                </ul>
+            </nav>
+        <?php endif; ?>
     </main>
 </div>
 

@@ -2,6 +2,10 @@
 require_once __DIR__ . '/auth_admin.php';
 
 $categoriaEditar = null;
+$busquedaAdmin = trim($_GET['buscar'] ?? '');
+$pagina = max(1, (int) ($_GET['pagina'] ?? 1));
+$porPagina = 8;
+$offset = ($pagina - 1) * $porPagina;
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     try {
@@ -48,12 +52,27 @@ if (isset($_GET['editar'])) {
     $categoriaEditar = db_one('SELECT * FROM categoria WHERE id_categoria = ?', [(int) $_GET['editar']]);
 }
 
+$whereCategorias = [];
+$paramsCategorias = [];
+
+if ($busquedaAdmin !== '') {
+    $whereCategorias[] = '(c.nombre_categoria LIKE ? OR c.descripcion LIKE ?)';
+    $like = '%' . $busquedaAdmin . '%';
+    $paramsCategorias = [$like, $like];
+}
+
+$whereSqlCategorias = $whereCategorias ? ' WHERE ' . implode(' AND ', $whereCategorias) : '';
+$totalCategorias = (int) db_value('SELECT COUNT(*) FROM categoria c' . $whereSqlCategorias, $paramsCategorias, 0);
+$totalPaginas = max(1, (int) ceil($totalCategorias / $porPagina));
 $categorias = db_all(
     'SELECT c.id_categoria, c.nombre_categoria, c.descripcion, COUNT(p.id_producto) AS total_productos
      FROM categoria c
      LEFT JOIN producto p ON p.id_categoria = c.id_categoria
+     ' . $whereSqlCategorias . "
      GROUP BY c.id_categoria, c.nombre_categoria, c.descripcion
-     ORDER BY c.nombre_categoria'
+     ORDER BY c.nombre_categoria
+     LIMIT $porPagina OFFSET $offset",
+    $paramsCategorias
 );
 ?>
 <!DOCTYPE html>
@@ -78,6 +97,15 @@ $categorias = db_all(
             <h1 class="mb-0">Categorias</h1>
             <a class="btn btn-outline-primary" href="categorias.php">Limpiar formulario</a>
         </div>
+
+        <form method="GET" action="categorias.php" class="row g-2 mb-4">
+            <div class="col-md-10">
+                <input type="search" name="buscar" class="form-control" placeholder="Buscar categoria o descripcion" value="<?php echo e($busquedaAdmin); ?>">
+            </div>
+            <div class="col-md-2">
+                <button class="btn btn-primary w-100">Buscar</button>
+            </div>
+        </form>
 
         <div class="card p-4 mb-4">
             <h2 class="h4 fw-bold mb-3"><?php echo $categoriaEditar ? 'Editar categoria' : 'Nueva categoria'; ?></h2>
@@ -126,6 +154,18 @@ $categorias = db_all(
                 </div>
             <?php endforeach; ?>
         </div>
+
+        <?php if ($totalPaginas > 1): ?>
+            <nav class="mt-4">
+                <ul class="pagination">
+                    <?php for ($i = 1; $i <= $totalPaginas; $i++): ?>
+                        <li class="page-item <?php echo $i === $pagina ? 'active' : ''; ?>">
+                            <a class="page-link" href="categorias.php?buscar=<?php echo urlencode($busquedaAdmin); ?>&pagina=<?php echo $i; ?>"><?php echo $i; ?></a>
+                        </li>
+                    <?php endfor; ?>
+                </ul>
+            </nav>
+        <?php endif; ?>
     </main>
 </div>
 

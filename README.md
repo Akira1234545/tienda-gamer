@@ -18,6 +18,9 @@ Sistema web de venta de equipos gamer desarrollado con PHP, MySQL, Bootstrap 5, 
 - Historial de compras del cliente.
 - Dashboard administrativo con metricas, bajo stock y productos mas vendidos.
 - Panel de usuarios con cambio de roles.
+- Recibo post-compra con numero de venta y resumen.
+- Informacion de tienda editable desde el panel admin.
+- Busqueda y paginacion en tablas administrativas.
 
 ## Tecnologias
 
@@ -49,6 +52,12 @@ database/tienda_gamer.sql
 
 ```text
 database/migrations_2fa.sql
+```
+
+Si tu base fue creada antes de la seccion editable de tienda, ejecuta:
+
+```text
+database/migrations_configuracion_tienda.sql
 ```
 
 5. Copia `.env.example` como `.env` y ajusta credenciales:
