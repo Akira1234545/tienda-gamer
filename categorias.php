@@ -28,6 +28,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
 
         if ($accion === 'eliminar') {
+            $totalProductos = (int) db_value('SELECT COUNT(*) FROM producto WHERE id_categoria = ?', [$id], 0);
+
+            if ($totalProductos > 0) {
+                throw new RuntimeException('No puedes eliminar una categoria con productos asignados.');
+            }
+
             db()?->prepare('DELETE FROM categoria WHERE id_categoria = ?')->execute([$id]);
             flash('success', 'Categoria eliminada correctamente.');
             redirect('categorias.php');

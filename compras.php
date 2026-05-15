@@ -1,5 +1,5 @@
 <?php
-require_once __DIR__ . '/auth.php';
+require_once __DIR__ . '/auth_cliente.php';
 
 $compras = db_all(
     'SELECT id_venta, fecha, total, estado_venta

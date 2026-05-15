@@ -23,6 +23,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 throw new RuntimeException('Completa los datos del producto correctamente.');
             }
 
+            if ($stock === 0) {
+                $estado = 0;
+            }
+
             $imagen = upload_product_image($_FILES['imagen'] ?? []);
 
             if ($accion === 'crear') {

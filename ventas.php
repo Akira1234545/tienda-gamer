@@ -28,6 +28,25 @@ $ventas = db_all(
      GROUP BY v.id_venta, u.nombre, v.fecha, v.total, v.estado_venta
      ORDER BY v.fecha DESC'
 );
+
+$detallesPorVenta = [];
+
+if ($ventas) {
+    $ids = array_column($ventas, 'id_venta');
+    $placeholders = implode(',', array_fill(0, count($ids), '?'));
+    $detalles = db_all(
+        "SELECT d.id_venta, p.nombre, p.marca, d.cantidad, d.subtotal
+         FROM detalle_venta d
+         INNER JOIN producto p ON p.id_producto = d.id_producto
+         WHERE d.id_venta IN ($placeholders)
+         ORDER BY d.id_detalle ASC",
+        $ids
+    );
+
+    foreach ($detalles as $detalle) {
+        $detallesPorVenta[$detalle['id_venta']][] = $detalle;
+    }
+}
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -59,11 +78,12 @@ $ventas = db_all(
                         <th>Total</th>
                         <th>Estado</th>
                         <th>Actualizar</th>
+                        <th>Detalle</th>
                     </tr>
                 </thead>
                 <tbody>
                     <?php if (!$ventas): ?>
-                        <tr><td colspan="7" class="text-center text-muted py-4">No hay ventas registradas.</td></tr>
+                        <tr><td colspan="8" class="text-center text-muted py-4">No hay ventas registradas.</td></tr>
                     <?php endif; ?>
 
                     <?php foreach ($ventas as $venta): ?>
@@ -95,6 +115,40 @@ $ventas = db_all(
                                     <button class="btn btn-primary btn-sm">Guardar</button>
                                 </form>
                             </td>
+                            <td>
+                                <button class="btn btn-outline-primary btn-sm" type="button" data-bs-toggle="collapse" data-bs-target="#detalle-venta-<?php echo e((string) $venta['id_venta']); ?>">
+                                    Ver productos
+                                </button>
+                            </td>
+                        </tr>
+                        <tr class="collapse" id="detalle-venta-<?php echo e((string) $venta['id_venta']); ?>">
+                            <td colspan="8">
+                                <div class="p-3 bg-light rounded">
+                                    <h2 class="h6 fw-bold mb-3">Productos incluidos</h2>
+                                    <div class="table-responsive">
+                                        <table class="table table-sm mb-0">
+                                            <thead>
+                                                <tr>
+                                                    <th>Producto</th>
+                                                    <th>Marca</th>
+                                                    <th>Cantidad</th>
+                                                    <th>Subtotal</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <?php foreach ($detallesPorVenta[$venta['id_venta']] ?? [] as $detalle): ?>
+                                                    <tr>
+                                                        <td><?php echo e($detalle['nombre']); ?></td>
+                                                        <td><?php echo e($detalle['marca']); ?></td>
+                                                        <td><?php echo e((string) $detalle['cantidad']); ?></td>
+                                                        <td><?php echo money($detalle['subtotal']); ?></td>
+                                                    </tr>
+                                                <?php endforeach; ?>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </td>
                         </tr>
                     <?php endforeach; ?>
                 </tbody>
@@ -103,5 +157,7 @@ $ventas = db_all(
     </main>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="assets/js/app.js"></script>
 </body>
 </html>

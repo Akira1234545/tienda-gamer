@@ -1,5 +1,5 @@
 <?php
-require_once __DIR__ . '/auth.php';
+require_once __DIR__ . '/auth_cliente.php';
 
 ensure_session();
 
@@ -92,7 +92,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $detalle[] = [$producto, (int) $cantidad, $subtotal];
             }
 
-            $pdo->prepare('INSERT INTO venta (id_usuario, total, estado_venta) VALUES (?, ?, ?)')->execute([$_SESSION['usuario_id'], $total, 'Pagado']);
+            $pdo->prepare('INSERT INTO venta (id_usuario, total, estado_venta) VALUES (?, ?, ?)')->execute([$_SESSION['usuario_id'], $total, 'Pendiente']);
             $idVenta = (int) $pdo->lastInsertId();
 
             foreach ($detalle as [$producto, $cantidad, $subtotal]) {
@@ -131,6 +131,8 @@ if ($items) {
         $total += (float) $producto['precio'] * $cantidad;
     }
 }
+
+$confirmarCompra = isset($_GET['confirmar']) && $productosCarrito;
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -150,6 +152,56 @@ if ($items) {
     <?php include 'includes/flash.php'; ?>
     <h2 class="mb-4">Carrito de Compras</h2>
 
+    <?php if ($confirmarCompra): ?>
+        <div class="card p-4 mb-4">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <div>
+                    <span class="eyebrow">Resumen</span>
+                    <h3 class="mb-0">Confirmar compra</h3>
+                </div>
+                <a class="btn btn-outline-primary" href="carrito.php">Editar carrito</a>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table align-middle">
+                    <thead>
+                        <tr>
+                            <th>Producto</th>
+                            <th>Cantidad</th>
+                            <th>Precio</th>
+                            <th>Subtotal</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php foreach ($productosCarrito as $producto): ?>
+                            <?php
+                            $cantidad = (int) ($items[$producto['id_producto']] ?? 0);
+                            $subtotal = (float) $producto['precio'] * $cantidad;
+                            ?>
+                            <tr>
+                                <td><?php echo e($producto['nombre']); ?></td>
+                                <td><?php echo e((string) $cantidad); ?></td>
+                                <td><?php echo money($producto['precio']); ?></td>
+                                <td><?php echo money($subtotal); ?></td>
+                            </tr>
+                        <?php endforeach; ?>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+                <p class="text-muted mb-0">La venta quedara registrada como pendiente para revision administrativa.</p>
+                <div class="text-end">
+                    <h3>Total: <?php echo money($total); ?></h3>
+                    <form method="POST" action="carrito.php">
+                        <?php echo csrf_field(); ?>
+                        <input type="hidden" name="accion" value="comprar">
+                        <button class="btn btn-success">Confirmar y registrar compra</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    <?php else: ?>
     <form method="POST" action="carrito.php">
         <?php echo csrf_field(); ?>
         <input type="hidden" name="accion" value="actualizar">
@@ -200,7 +252,7 @@ if ($items) {
 
             <div class="text-end">
                 <h3>Total: <?php echo money($total); ?></h3>
-                <button class="btn btn-success" type="submit" form="checkout" <?php echo !$productosCarrito ? 'disabled' : ''; ?>>Confirmar Compra</button>
+                <a class="btn btn-success <?php echo !$productosCarrito ? 'disabled' : ''; ?>" href="carrito.php?confirmar=1">Confirmar Compra</a>
             </div>
         </div>
     </form>
@@ -218,10 +270,7 @@ if ($items) {
         <input type="hidden" name="accion" value="vaciar">
     </form>
 
-    <form id="checkout" method="POST" action="carrito.php" class="d-none">
-        <?php echo csrf_field(); ?>
-        <input type="hidden" name="accion" value="comprar">
-    </form>
+    <?php endif; ?>
 </div>
 
 <?php include 'includes/footer.php'; ?>

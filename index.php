@@ -14,7 +14,7 @@ $categoriasLanding = db_all(
 
 $marcas = db_all('SELECT DISTINCT marca FROM producto WHERE estado = 1 ORDER BY marca');
 
-$where = ['p.estado = 1'];
+$where = ['p.estado = 1', 'p.stock > 0'];
 $params = [];
 
 if ($busqueda !== '') {
@@ -41,7 +41,7 @@ if ($precioMax > 0) {
 }
 
 $productosDestacados = db_all(
-    'SELECT p.id_producto, p.nombre, p.descripcion, p.precio, p.imagen
+    'SELECT p.id_producto, p.nombre, p.descripcion, p.precio, p.stock, p.imagen
      FROM producto p
      INNER JOIN categoria c ON c.id_categoria = p.id_categoria
      WHERE ' . implode(' AND ', $where) . '
@@ -94,7 +94,7 @@ if (!$categoriasLanding && !db()) {
         <p>Una seleccion visual para la primera version de la tienda.</p>
     </div>
 
-    <form method="GET" action="index.php#productos" class="catalog-filter row g-3 mb-4">
+    <form method="GET" action="index.php#productos" class="catalog-filter row g-3 mb-4" data-ajax-filter="search_productos.php" data-target="#productos-grid">
         <div class="col-md-4">
             <input type="search" name="q" class="form-control" placeholder="Buscar por producto, marca o categoria" value="<?php echo e($busqueda); ?>">
         </div>
@@ -126,8 +126,36 @@ if (!$categoriasLanding && !db()) {
         </div>
     </form>
 
-    <div class="row g-4">
+    <div class="row g-4" id="productos-grid">
         <?php include 'includes/cards.php'; ?>
+    </div>
+</section>
+
+<section class="container section-space pt-0" id="tienda">
+    <div class="section-heading text-center">
+        <span class="eyebrow">GameZone Store</span>
+        <h2>Informacion de la tienda</h2>
+    </div>
+
+    <div class="row g-4 text-center">
+        <div class="col-md-4">
+            <div class="benefit-item p-4">
+                <h4>Ubicacion</h4>
+                <p>Av. Gamer 123, Zona Central, La Paz.</p>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="benefit-item p-4">
+                <h4>Atencion</h4>
+                <p>Lunes a sabado de 09:00 a 19:00.</p>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="benefit-item p-4">
+                <h4>Contacto</h4>
+                <p>ventas@gamezone.test - +591 70000000.</p>
+            </div>
+        </div>
     </div>
 </section>
 
