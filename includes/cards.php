@@ -58,11 +58,14 @@ if (!$productosDestacados && !db()) {
                 </h5>
                 <p class="card-text"><?php echo e($producto['descripcion'] ?? 'Producto gamer disponible'); ?></p>
                 <div class="product-footer mt-auto">
-                    <h4><?php echo money($producto['precio']); ?></h4>
-                    <?php if (isset($producto['stock'])): ?>
-                        <p class="text-muted small mb-2">Stock: <?php echo e((string) $producto['stock']); ?></p>
-                    <?php endif; ?>
-                    <div class="d-flex gap-2">
+                    <div class="product-meta">
+                        <h4><?php echo money($producto['precio']); ?></h4>
+                        <?php if (isset($producto['stock'])): ?>
+                            <p class="text-muted small mb-0">Stock: <?php echo e((string) $producto['stock']); ?></p>
+                        <?php endif; ?>
+                    </div>
+
+                    <div class="product-actions">
                         <a class="btn btn-outline-secondary" href="producto.php?id=<?php echo e((string) ($producto['id_producto'] ?? 0)); ?>">Ver</a>
                         <?php if (is_logged_in()): ?>
                             <form method="POST" action="favoritos.php">

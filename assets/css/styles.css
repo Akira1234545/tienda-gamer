@@ -18,9 +18,16 @@
     letter-spacing: 0;
 }
 
+html {
+    min-height: 100%;
+}
+
 body {
+    min-height: 100vh;
     background: var(--soft);
     color: var(--ink);
+    display: flex;
+    flex-direction: column;
     font-family: Inter, "Segoe UI", Arial, sans-serif;
 }
 
@@ -32,6 +39,14 @@ a {
     background: rgba(16, 24, 40, 0.94);
     border-bottom: 1px solid rgba(255, 255, 255, 0.08);
     backdrop-filter: blur(18px);
+}
+
+.app-navbar .container {
+    min-height: 72px;
+}
+
+.app-navbar .navbar-nav {
+    gap: 0.22rem;
 }
 
 .navbar-brand,
@@ -58,9 +73,13 @@ a {
     color: rgba(255, 255, 255, 0.72) !important;
     font-weight: 600;
     font-size: 0.94rem;
+    border-radius: 8px;
+    padding: 0.58rem 0.78rem !important;
+    transition: background-color 0.18s ease, color 0.18s ease;
 }
 
 .nav-link:hover {
+    background: rgba(255, 255, 255, 0.08);
     color: #fff !important;
 }
 
@@ -188,23 +207,51 @@ a {
 
 .card-title {
     font-weight: 800;
+    min-height: 2.45rem;
 }
 
 .card-text {
     color: var(--muted);
+    min-height: 4.7rem;
 }
 
 .product-footer {
     display: flex;
-    gap: 16px;
-    align-items: center;
-    justify-content: space-between;
+    flex-direction: column;
+    gap: 14px;
 }
 
-.product-footer h4 {
+.product-meta {
+    display: flex;
+    align-items: end;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.product-meta h4 {
     margin: 0;
     color: var(--blue);
     font-weight: 800;
+    white-space: nowrap;
+}
+
+.product-actions {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(92px, 1fr));
+    gap: 10px;
+}
+
+.product-actions form {
+    min-width: 0;
+}
+
+.product-actions .btn {
+    width: 100%;
+    min-height: 44px;
+    padding: 0.58rem 0.7rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .category-section {
@@ -259,6 +306,7 @@ a {
 
 .app-footer {
     background: #090d16;
+    margin-top: auto;
 }
 
 .bg-dark {
@@ -409,5 +457,9 @@ a {
 
     .hero-content h1 {
         font-size: 3rem;
+    }
+
+    .product-actions {
+        grid-template-columns: 1fr;
     }
 }

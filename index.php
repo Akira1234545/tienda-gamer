@@ -82,7 +82,9 @@ if (!$categoriasLanding && !db()) {
             <p class="lead">Componentes, perifericos y equipos listos para rendimiento competitivo.</p>
             <div class="hero-actions">
                 <a href="#productos" class="btn btn-danger btn-lg">Ver Productos</a>
-                <a href="dashboard.php" class="btn btn-outline-light btn-lg">Panel Admin</a>
+                <?php if (is_admin()): ?>
+                    <a href="dashboard.php" class="btn btn-outline-light btn-lg">Panel Admin</a>
+                <?php endif; ?>
             </div>
         </div>
     </div>
